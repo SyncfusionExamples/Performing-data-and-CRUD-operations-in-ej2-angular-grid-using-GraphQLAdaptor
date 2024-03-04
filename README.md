@@ -17,5 +17,5 @@ npm install
 ```
 and run using
 ```
-npm start
+ng serve
 ```
