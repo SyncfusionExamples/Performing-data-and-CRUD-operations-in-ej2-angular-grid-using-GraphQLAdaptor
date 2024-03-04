@@ -61,7 +61,7 @@ export class AppComponent implements OnInit {
         }
       })
     });
-    this.pageSettings = { pageSize: 5 };
+    this.pageSettings = { pageSize: 12 };
     this.editSettings = { allowAdding: true, allowDeleting: true, allowEditing: true, mode: 'Normal' };
     this.toolbar = ['Search', 'Add', 'Delete', 'Update', 'Cancel'];
   }
