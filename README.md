@@ -31,7 +31,7 @@ ng serve
 ```
 ## Resources
 
-You can also refer the below resources to know more details about Syncfusion Angular Scheduler components.
+You can also refer the below resources to know more details about Syncfusion Angular Grid components.
 * [Demo](https://ej2.syncfusion.com/angular/demos/#/material3/grid/over-view)
 * [Documentation](https://ej2.syncfusion.com/angular/documentation/grid/getting-started)
 * [GraphQL with Syncfusion DataManager](https://ej2.syncfusion.com/angular/documentation/grid/connecting-to-adaptors/graphql-adaptor)
