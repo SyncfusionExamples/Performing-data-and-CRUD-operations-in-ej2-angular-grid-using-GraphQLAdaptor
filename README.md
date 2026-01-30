@@ -23,7 +23,6 @@ GraphQL is a query language that allows applications to request exactly the data
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd GraphQL_Angular_Sample
    ```
 
 
