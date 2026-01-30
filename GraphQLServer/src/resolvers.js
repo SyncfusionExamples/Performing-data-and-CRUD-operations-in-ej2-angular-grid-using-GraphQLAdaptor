@@ -5,31 +5,38 @@ DataUtil.serverTimezoneOffset = 0;
 
 const resolvers = {
   Query: {
-    // Main query used by the grid (supports paging, sorting, filtering, searching)
+    /* Main query used by the grid (supports paging, sorting, filtering, searching. */ 
     getProducts: (parent, { datamanager }, context, info) => {
       console.log('getProducts called with:', datamanager);
 
       let orders = [...productDetails];
       const query = new Query();
-      // 1. Filtering
+       /*------------------------ 1. Filtering-----------------------------------*/
       const performFiltering = (filterString) => {
         const parsed = JSON.parse(filterString);
 
-        // Some filter UIs send an array of predicates; commonly you want the first group
-        // Adjust this if your payload is different
+        /**
+          * The parsed filter can be an array or a single object.
+          * We normalize it here so we always work on the first element.
+        */
         const predicateCollection = Array.isArray(parsed) ? parsed[0] : parsed;
 
-        // Guard
+        /* If no valid predicate structure exists, return the original query unchanged. */
         if (!predicateCollection || !Array.isArray(predicateCollection.predicates) || predicateCollection.predicates.length === 0) {
           return query; // nothing to apply
         }
 
+        /* Determines whether multiple predicates should be combined using AND / OR. */ 
         const condition = (predicateCollection.condition || 'and').toLowerCase(); // 'and' | 'or'
         const ignoreCase = predicateCollection.ignoreCase !== undefined ? !!predicateCollection.ignoreCase : true;
 
-        // Build a combined Predicate chain
+        /*This variable will accumulate the full predicate chain*/
         let combined = null;
 
+        /**
+           * Loop through each predicate and convert it into Syncfusion Predicate objects.
+           * Supports nested (complex) filter groups through recursive processing.
+        */
         predicateCollection.predicates.forEach(p => {
           // If the format nests predicateCollections, handle recursively
           if (p.isComplex && Array.isArray(p.predicates)) {
@@ -50,20 +57,34 @@ const resolvers = {
             : pred;
         });
 
-        // Clear previous where clauses if needed (optional depending on your lifecycle)
-        // query.queries = query.queries.filter(q => q.fn !== 'where');
-
+        /* Apply the final combined predicate to the Syncfusion Query object. */
         if (combined) {
           query.where(combined);
         }
 
         return query;
       };
-      // Helper for nested predicates
+      
+       /**
+         * Builds a nested Predicate structure from complex filter conditions.
+         * This function is called recursively to handle multi-level filter logic.
+         * (e.g., AND/OR combinations inside other AND/OR blocks).
+         *
+         * @param block - A complex filter object containing nested predicates.
+         * @param ignoreCase - Whether string comparisons should ignore case.
+         * @returns A merged Predicate representing the entire nested filter block.
+        */
       function buildNestedPredicate(block, ignoreCase) {
+        /* Determine whether this block uses "and" or "or" to merge its child predicates.*/
         const condition = (block.condition || 'and').toLowerCase();
+
+        /* Will store the final combined Predicate after processing all nested items. */
         let mergedPredicate = null;
 
+        /**
+           * Loop through each predicate entry within the current block.
+           * Each entry can be a simple predicate or another nested (complex) block.
+        */
         block.predicates.forEach(p => {
           let node;
           if (p.isComplex && Array.isArray(p.predicates)) {
@@ -81,12 +102,13 @@ const resolvers = {
         return mergedPredicate;
       }
   
-      // 2. Searching (uncomment when you want to support grid search)
+      /*----------- 2. Searching------------------------------------*/
       const performSearching = (searchParam) => {
         const { fields, key } = JSON.parse(searchParam)[0];
         query.search(key, fields);
       }
-      // 3. Sorting
+     
+      /*-----------------3. Sorting-----------------------------------*/
      const performSorting = (sorted) => {
         for (let i = 0; i < sorted.length; i++) {
           const { name, direction } = sorted[i];
@@ -94,7 +116,7 @@ const resolvers = {
         }
       }
 
-      // Apply all operations
+       /* Apply all operations */
       if (datamanager.where) {
         performFiltering(datamanager.where);
       }
@@ -105,13 +127,13 @@ const resolvers = {
         performSorting(datamanager.sorted);
       }
 
-      // Execute filtering/sorting/search first
+      /* Execute filtering/sorting/search first. */
       const filteredData = new DataManager(orders).executeLocal(query);
 
-      // Total count after filtering
+       /* Total count after filtering */
       const count = filteredData.length;
 
-      // 4. Paging
+      /*-------------------- 4. Paging----------------------------------*/
       let result = filteredData;
 
       if (datamanager.take !== undefined) {
@@ -128,6 +150,7 @@ const resolvers = {
       };
     },
 
+     /* Query to get a single product by ID. */
     getProductById: (parent, { datamanager }) => {
       console.log('getProductById called with datamanager:', datamanager);
 
@@ -150,10 +173,33 @@ const resolvers = {
   },
 
   Mutation: {
+    /**
+     * Create a new product.
+     *
+     * @param _parent - Unused, kept for GraphQL resolver signature consistency.
+     * @param args - Arguments containing the `value` payload for the new product.
+     * @returns The newly created product object.
+     */
     createProduct: (parent, { value }, context, info) => {
       productDetails.push(value);
       return value;
     },
+
+     /**
+     * Update an existing product by key.
+     * @param args - Arguments containing `key`, optional `keyColumn`, and `value` (partial update).
+     * @returns The updated product object.
+     *
+     * Behavior:
+     * - Defaults `keyColumn` to "productId" if not provided.
+     * - Finds the product using the provided key + keyColumn.
+     * - Performs a shallow merge (Object.assign) to update fields.
+     * 
+     * Caution:
+     * - `Object.assign` mutates the found object. If immutability is required,
+     *   consider replacing the item in the array with a new object instead.
+     */
+
     updateProduct: (parent, { key, keyColumn, value }, context, info) => {
       const product = productDetails.find(p => p.productId === key);
       if (!product) throw new Error("Product not found");
@@ -161,7 +207,17 @@ const resolvers = {
       Object.assign(product, value);
       return product;
     },
-     
+
+    /**
+     * Delete an existing product by key.
+     * @param args - Arguments containing `key` and optional `keyColumn`.
+     * @returns The deleted product object (commonly useful for confirmations/audits).
+     *
+     * Behavior:
+     * - Finds the index of the matching product.
+     * - Removes it from the in-memory array using `splice`.
+     * - Returns the removed entity.
+     */   
     deleteProduct: (parent, { key, keyColumn = 'productId' }, context, info) => {
       const idx = productDetails.findIndex(p => String(p[keyColumn]) === String(key));
       if (idx === -1) throw new Error('Product not found');
