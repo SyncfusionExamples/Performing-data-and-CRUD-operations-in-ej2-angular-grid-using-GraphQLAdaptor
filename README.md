@@ -1,4 +1,4 @@
-# Connecting the Syncfusion React Grid with GraphQL backend in Node.js
+# Connecting the Syncfusion Angular Grid with GraphQL backend in Node.js
 
 GraphQL is a query language that allows applications to request exactly the data needed, nothing more and nothing less. Unlike traditional REST APIs that return fixed data structures, GraphQL enables the client to specify the shape and content of the response.
 
@@ -23,7 +23,7 @@ GraphQL is a query language that allows applications to request exactly the data
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd GraphQL_React_Sample
+   cd GraphQL_Angular_Sample
    ```
 
 
