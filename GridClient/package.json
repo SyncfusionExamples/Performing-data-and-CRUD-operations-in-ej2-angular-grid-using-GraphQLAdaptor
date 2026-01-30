@@ -18,8 +18,11 @@
     "@angular/platform-browser": "^16.0.0",
     "@angular/platform-browser-dynamic": "^16.0.0",
     "@angular/router": "^16.0.0",
-    "@syncfusion/ej2-angular-grids": "^21.2.5",
-    "@syncfusion/ej2-data": "^21.2.3",
+    "@syncfusion/ej2-angular-dropdowns": "^32.1.23",
+    "@syncfusion/ej2-angular-grids": "*",
+    "@syncfusion/ej2-angular-inputs": "^32.1.22",
+    "@syncfusion/ej2-angular-popups": "^32.1.19",
+    "@syncfusion/ej2-data": "*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
