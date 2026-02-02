@@ -13,6 +13,6 @@
     "graphpack": "^1.0.9"
   },
   "dependencies": {
-    "@syncfusion/ej2-data": "21.2.3"
+    "@syncfusion/ej2-data": "*"
   }
 }
